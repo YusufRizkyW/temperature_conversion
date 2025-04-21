@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'home-page.dart'; // Import halaman utama setelah login
+import 'package:provider/provider.dart';
+import 'providers/auth_provider.dart';
+import 'home-page.dart';
 
 class MyLoginPage extends StatefulWidget {
   const MyLoginPage({super.key});
@@ -9,59 +11,88 @@ class MyLoginPage extends StatefulWidget {
 }
 
 class _MyLoginPageState extends State<MyLoginPage> {
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  String errorMessage = '';
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
-  // Data akun default
-  final String userEmail = "user@example.com";
-  final String userPassword = "123456";
+  void login(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    bool success = authProvider.login(
+      emailController.text,
+      passwordController.text,
+    );
 
-  void login() {
-    if (emailController.text == userEmail && passwordController.text == userPassword) {
-      setState(() {
-        errorMessage = '';
-      });
-
-      // Pindah ke halaman utama setelah login sukses
+    if (success) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
-    } else {
-      setState(() {
-        errorMessage = 'Email atau password salah!';
-      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final errorMessage = context.watch<AuthProvider>().errorMessage;
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Login")),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: "Email"),
+      backgroundColor: const Color(0xFFF3F4F6),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Card(
+            elevation: 10,
+            margin: const EdgeInsets.symmetric(horizontal: 24),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    "Welcome Back!",
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      labelText: "Email",
+                      prefixIcon: const Icon(Icons.email),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: "Password",
+                      prefixIcon: const Icon(Icons.lock),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => login(context),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text("Login", style: TextStyle(fontSize: 16)),
+                    ),
+                  ),
+                  if (errorMessage.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: Text(
+                        errorMessage,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                ],
+              ),
             ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: "Password"),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: login,
-              child: const Text("Login"),
-            ),
-            if (errorMessage.isNotEmpty) // Menampilkan pesan error jika login gagal
-              Text(errorMessage, style: const TextStyle(color: Colors.red)),
-          ],
+          ),
         ),
       ),
     );

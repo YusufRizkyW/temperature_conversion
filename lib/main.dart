@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
-import 'login-page.dart'; // Import halaman login
+import 'package:provider/provider.dart';
+import 'providers/auth_provider.dart';
+import 'providers/temperature_provider.dart';
+import 'login-page.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => TemperatureProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -11,12 +22,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false, // Menghilangkan label debug
+      debugShowCheckedModeBanner: false,
       title: 'Aplikasi Konversi Suhu',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-      ),
-      home: const MyLoginPage(), // Halaman pertama adalah Login
+      theme: ThemeData(primarySwatch: Colors.green),
+      home: const MyLoginPage(),
     );
   }
 }
